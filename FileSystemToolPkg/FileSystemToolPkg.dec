@@ -1,0 +1,7 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x0001001A
+  PACKAGE_NAME                   = FileSystemToolPkg
+  PACKAGE_GUID                   = 61d0aa13-624f-4eb0-814e-fa4dc79034bc
+  PACKAGE_VERSION                = 0.1
+
+

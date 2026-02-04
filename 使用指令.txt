@@ -1,0 +1,641 @@
+使用相關函數
+
+EFI_SIMPLE_TEXT_INPUT_PROTOCOL.ReadKeyStroke()
+
+Summary
+Reads the next keystroke from the input device
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_INPUT_READ_KEY) (
+ IN EFI_SIMPLE_TEXT_INPUT_PROTOCOL *This,
+OUT EFI_INPUT_KEY                  *Key
+ );
+
+Parameters
+
+This: A pointer to the EFI_SIMPLE_TEXT_INPUT_PROTOCOL instance. 
+Type EFI_SIMPLE_TEXT_INPUT_PROTOCOL is defined in Section 12.3
+
+Key: A pointer to a buffer that is filled in with the keystroke information 
+for the key that was pressed. Type EFI_INPUT_KEY is defined in 
+“Related Definitions” below
+
+Description
+The ReadKeyStroke() function reads the next keystroke from the input device. If there is no pending 
+keystroke the function returns EFI_NOT_READY. If there is a pending keystroke, then ScanCode is the EFI scan code defined in Table 12-2. The UnicodeChar is the actual printable character or is zero if the key does not represent a printable character (control key, function key, etc.). 
+
+Status Codes Returned
+
+EFI_SUCCESS       The keystroke information was returned.
+EFI_NOT_READY     There was no keystroke data available.
+EFI_DEVICE_ERROR  The keystroke information was not returned due to hardware errors.
+EFI_UNSUPPORTED   The device does not support the ability to read keystroke data.
+
+EFI_BOOT_SERVICES.WaitForEvent()
+Summary
+
+Stops execution until an event is signaled.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_WAIT_FOR_EVENT) (
+   IN UINTN             NumberOfEvents,
+   IN EFI_EVENT         *Event,
+   OUT UINTN            *Index
+  );
+
+Parameters
+
+NumberOfEvents: The number of events in the Event array.
+
+Event: An array of EFI_EVENT. Type EFI_EVENT is defined in UEFI Forum, Inc. March 2021 148 EFI_BOOT_SERVICES.CreateEvent() function description.
+
+Index:　Pointer to the index of the event which satisfied the wait condition.
+
+Description
+
+This function must be called at priority level TPL_APPLICATION. If an attempt is made to call it at any other priority level, EFI_UNSUPPORTED is returned.
+
+The list of events in the Event array are evaluated in order from first to last, and this evaluation is repeated until an event is signaled or an error is detected. The following checks are performed on each event in the Event array.
+
+If an event is of type EVT_NOTIFY_SIGNAL, then EFI_INVALID_PARAMETER is returned and Index indicates the event that caused the failure.
+
+If an event is in the signaled state, the signaled state is cleared and EFI_SUCCESS is returned, and Index indicates the event that was signaled.
+
+If an event is not in the signaled state but does have a notification function, the notification function is queued at the event’s notification task priority level. If the execution of the event’s notification function causes the event to be signaled, then the signaled state is cleared, EFI_SUCCESS is returned, and Index indicates the event that was signaled.
+
+To wait for a specified time, a timer event must be included in the Event array.
+
+To check if an event is signaled without waiting, an already signaled event can be used as the last event in the list being checked, or the CheckEvent() interface may be used.
+
+Status Codes Returned
+
+EFI_SUCCESS             The event indicated by Index was signaled.
+EFI_INVALID_PARAMETER　 NumberOfEvents is 0.
+EFI_INVALID_PARAMETER   The event indicated by Index is of type EVT_NOTIFY_SIGNAL.
+EFI_UNSUPPORTED         The current TPL is not TPL_APPLICATION.
+
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.SetMode()
+Summary
+
+Sets the output device(s) to a specified mode.
+
+Prototype
+
+typedef
+EFI_STATUS
+(* EFIAPI EFI_TEXT_SET_MODE) (
+ IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL          *This,
+ IN UINTN                                    ModeNumber
+ );
+Parameters
+
+This: A pointer to the EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL instance. Type EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL is defined in the “Related Definitions” of Simple Text Output Protocol.
+
+ModeNumber: The text mode to set.
+
+Description
+
+The SetMode() function sets the output device(s) to the requested mode. On success the device is in the geometry for the requested mode, and the device has been cleared to the current background color with the cursor at (0,0).
+
+Status Codes Returned
+
+EFI_SUCCESS      The requested text mode was set.
+EFI_DEVICE_ERROR The device had an error and could not complete the request.
+EFI_UNSUPPORTED  The mode number was not valid.
+
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.ClearScreen()
+Summary
+
+Clears the output device(s) display to the currently selected background color.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI \*EFI_TEXT_CLEAR_SCREEN) (
+ IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL             *This
+ );
+Parameters
+
+This:　A pointer to the EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL instance. Type EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL is defined in the “Related Definitions” of Simple Text Output Protocol.
+
+Description
+
+The ClearScreen() function clears the output device(s) display to the currently selected background color. The cursor position is set to (0, 0).
+
+Status Codes Returned
+
+EFI_SUCCESS　　   The operation completed successfully.
+EFI_DEVICE_ERROR  The device had an error and could not complete the request.
+EFI_UNSUPPORTED   The output device is not in a valid text mode.
+
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.SetCursorPosition()
+Summary
+
+Sets the current coordinates of the cursor position.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_TEXT_SET_CURSOR_POSITION) (
+ IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL             *This,
+ IN UINTN                                       Column,
+ IN UINTN                                       Row
+ );
+Parameters
+
+This: A pointer to the EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL instance. Type EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL is defined in the “Related Definitions” of Simple Text Output Protocol .
+
+Column, Row: The position to set the cursor to. Must greater than or equal to zero and less than the number of columns and rows returned by EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.QueryMode() .
+
+Description
+
+The SetCursorPosition() function sets the current coordinates of the cursor position. The upper left corner of the screen is defined as coordinate (0, 0).
+
+Status Codes Returned
+
+EFI_SUCCESS       The operation completed successfully.
+EFI_DEVICE_ERROR  The device had an error and could not complete the request.
+EFI_UNSUPPORTED   The output device is not in a valid text mode, or the cursor position is invalid for the current mode.
+
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL.EnableCursor()
+Summary
+
+Makes the cursor visible or invisible.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_TEXT_ENABLE_CURSOR) (
+ IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL             *This,
+ IN BOOLEAN                                     Visible
+ );
+Parameters
+
+This: A pointer to the EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL instance. Type EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL is defined in the “Related Definitions” of Simple Text Output Protocol .
+
+Visible:If TRUE, the cursor is set to be visible. If FALSE, the cursor is set to be invisible.
+
+Description
+
+The EnableCursor() function makes the cursor visible or invisible.
+
+Status Codes Returned
+
+EFI_SUCCESS       The operation completed successfully.
+EFI_DEVICE_ERROR  The device had an error and could not complete the request or the device does not support changing the cursor mode.
+EFI_UNSUPPORTED   The output device does not support visibility control of the cursor.
+
+EFI_BOOT_SERVICES.LocateDevicePath()
+Summary
+
+Locates the handle to a device on the device path that supports the specified protocol.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_LOCATE_DEVICE_PATH) (
+   IN EFI_GUID                         *Protocol,
+   IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePath,
+   OUT EFI_HANDLE                      *Device
+   );
+Parameters
+
+Protocol
+The protocol to search for. Type EFI_GUID is defined in the EFI_BOOT_SERVICES.InstallProtocolInterface() function description.
+
+DevicePath
+On input, a pointer to a pointer to the device path. On output, the device path pointer is modified to point to the remaining part of the device path–that is, when the function finds the closest handle, it splits the device path into two parts, stripping off the front part, and returning the remaining portion. EFI_DEVICE_PATH_PROTOCOL is defined in EFI Device Path Protocol .
+
+Device
+A pointer to the returned device handle. Type EFI_HANDLE is defined in the InstallProtocolInterface() function description.
+
+Description
+
+The LocateDevicePath() function locates all devices on DevicePath that support Protocol and returns the handle to the device that is closest to DevicePath. DevicePath is advanced over the device path nodes that were matched.
+
+This function is useful for locating the proper instance of a protocol interface to use from a logical parent device driver. For example, a target device driver may issue the request with its own device path and locate the interfaces to perform I/O on its bus. It can also be used with a device path that contains a file path to strip off the file system portion of the device path, leaving the file path and handle to the file system driver needed to access the file.
+
+If the handle for DevicePath supports the protocol (a direct match), the resulting device path is advanced to the device path terminator node. If DevicePath is a multi-instance device path, the function will operate on the first instance.
+
+Status Codes Returned
+EFI_SUCCESS             The resulting handle was returned.
+EFI_NOT_FOUND           No handles matched the search.
+EFI_INVALID_PARAMETER   Protocol is NULL
+EFI_INVALID_PARAMETER   DevicePath is NULL.
+EFI_INVALID_PARAMETER   A handle matched the search and Device is NULL.
+
+Simple File System Protocol
+The Simple File System protocol allows code running in the EFI boot services environment to obtain file based access to a device. EFI_SIMPLE_FILE_SYSTEM_PROTOCOL is used to open a device volume and return an EFI_FILE_PROTOCOL that provides interfaces to access files on a device volume.
+
+13.4.1. EFI_SIMPLE_FILE_SYSTEM_PROTOCOL
+Summary
+
+Provides a minimal interface for file-type access to a device.
+
+GUID
+
+#define EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID \
+ {0x0964e5b22,0x6459,0x11d2,\
+  {0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
+Revision Number
+
+#define EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION 0x00010000
+Protocol Interface Structure
+
+typedef struct _EFI_SIMPLE_FILE_SYSTEM_PROTOCOL {
+ UINT64                                         Revision;
+ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_OPEN_VOLUME    OpenVolume;
+} EFI_SIMPLE_FILE_SYSTEM_PROTOCOL;
+Parameters
+
+Revision
+The version of the EFI_FILE_PROTOCOL. The version specified by this specification is 0x00010000. All future revisions must be backwards compatible. If a future version is not backwards compatible, it is not the same GUID.
+
+OpenVolume
+Opens the volume for file I/O access. See the OpenVolume() EFI_SIMPLE_FILE SYSTEM_PROTOCOL.OpenVolume() function description.
+
+Description
+
+The EFI_SIMPLE_FILE_SYSTEM_PROTOCOL provides a minimal interface for file-type access to a device. This protocol is only supported on some devices.
+
+Devices that support the Simple File System protocol return an EFI_FILE_PROTOCOL. The only function of this interface is to open a handle to the root directory of the file system on the volume. Once opened, all accesses to the volume are performed through the volume’s file handles, using the EFI_FILE_PROTOCOL protocol. The volume is closed by closing all the open file handles.
+
+The firmware automatically creates handles for any block device that supports the following file system formats:
+
+FAT12
+
+FAT16
+
+FAT32
+EFI_SIMPLE_FILE SYSTEM_PROTOCOL.OpenVolume()
+Summary
+
+Opens the root directory on a volume.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_OPEN_VOLUME) (
+  IN EFI_SIMPLE_FILE_SYSTEM PROTOCOL                   *This,
+  OUT EFI_FILE_PROTOCOL                                **Root
+  );
+Parameters
+
+This
+A pointer to the volume to open the root directory of. See the type EFI_SIMPLE_FILE_SYSTEM_PROTOCOL description.
+
+Root
+A pointer to the location to return the opened file handle for the root directory. See the type see EFI_FILE_PROTOCOL description.
+
+Description
+
+The OpenVolume() function opens a volume, and returns a file handle to the volume’s root directory. This handle is used to perform all other file I/O operations. The volume remains open until all the file handles to it are closed.
+
+If the medium is changed while there are open file handles to the volume, all file handles to the volume will return EFI_MEDIA_CHANGED. To access the files on the new medium, the volume must be reopened with OpenVolume(). If the new medium is a different file system than the one supplied in the EFI_HANDLE’s DevicePath for the EFI_SIMPLE_SYSTEM_PROTOCOL, OpenVolume() will return EFI_UNSUPPORTED.
+
+Status Codes Returned
+
+EFI_SUCCESS           The file volume was opened.
+EFI_UNSUPPORTED       The volume does not support the requested file system type.
+EFI_NO_MEDIA          The device has no medium.
+EFI_DEVICE_ERROR      The device reported an error.
+EFI_VOLUME_CORRUPTED  The file system structures are corrupted.
+EFI_ACCESS_DENIED     The service denied access to the file.
+EFI_OUT_OF_RESOURCES  The file volume was not opened.
+EFI_MEDIA_CHANGED     The device has a different medium in it or the medium is no longer supported. Any existing file handles for this volume are no longer valid. To access the files on the new medium, the volume must be reopened with OpenVolume().
+
+
+File Protocol
+The protocol and functions described in this section support access to EFI-supported file systems.
+
+
+EFI_FILE_PROTOCOL
+Summary
+
+Provides file based access to supported file systems.
+
+Revision Number
+
+#define EFI_FILE_PROTOCOL_REVISION           0x00010000
+#define EFI_FILE_PROTOCOL_REVISION2          0x00020000
+#define EFI_FILE_PROTOCOL_LATEST_REVISION EFI_FILE_PROTOCOL_REVISION2
+Protocol Interface Structure
+
+typedef struct_EFI_FILE_PROTOCOL {
+  UINT64                          Revision;
+  EFI_FILE_OPEN                   Open;
+  EFI_FILE_CLOSE                  Close;
+  EFI_FILE_DELETE                 Delete;
+  EFI_FILE_READ                   Read;
+  EFI_FILE_WRITE                  Write;
+  EFI_FILE_GET_POSITION           GetPosition;
+  EFI_FILE_SET_POSITION           SetPosition;
+  EFI_FILE_GET_INFO               GetInfo;
+  EFI_FILE_SET_INFO               SetInfo;
+  EFI_FILE_FLUSH                  Flush;
+  EFI_FILE_OPEN_EX                OpenEx; // Added for revision 2
+  EFI_FILE_READ_EX                ReadEx; // Added for revision 2
+  EFI_FILE_WRITE_EX               WriteEx; // Added for revision 2
+  EFI_FILE_FLUSH_EX               FlushEx; // Added for revision 2
+} EFI_FILE_PROTOCOL;
+Parameters
+
+Revision
+The version of the EFI_FILE_PROTOCOL interface. The version specified by this specification is EFI_FILE_PROTOCOL_LATEST_REVISION. Future versions are required to be backward compatible to version 1.0.
+
+Open
+Opens or creates a new file. See the EFI_FILE_PROTOCOL.Open() function description.
+
+Close
+Closes the current file handle. See the EFI_FILE_PROTOCOL.Close() function description.
+
+Delete
+Deletes a file. See the EFI_FILE_PROTOCOL.Delete() function description.
+
+Read
+Reads bytes from a file. See the EFI_FILE_PROTOCOL.Read() function description.
+
+Write
+Writes bytes to a file. See the EFI_FILE_PROTOCOL.Write() function description.
+
+GetPosition
+Returns the current file position. See the EFI_FILE_PROTOCOL.GetPosition() function description.
+
+SetPosition
+Sets the current file position. See the EFI_FILE_PROTOCOL.SetPosition() function description.
+
+GetInfo
+Gets the requested file or volume information. See the EFI_FILE_PROTOCOL.GetInfo() function description.
+
+SetInfo
+Sets the requested file information. See the EFI_FILE_PROTOCOL.SetInfo() function description.
+
+Flush
+Flushes all modified data associated with the file to the device. See the EFI_FILE_PROTOCOL.Flush() function description.
+
+OpenEx
+Opens a new file relative to the source directory’s location.
+
+ReadEx
+Reads data from a file.
+
+WriteEx
+Writes data to a file.
+
+FlushEx
+Flushes all modified data associated with a file to a device.
+
+Description
+
+The EFI_FILE_PROTOCOL provides file IO access to supported file systems.
+
+An EFI_FILE_PROTOCOL provides access to a file’s or directory’s contents, and is also a reference to a location in the directory tree of the file system in which the file resides. With any given file handle, other files may be opened relative to this file’s location, yielding new file handles.
+
+On requesting the file system protocol on a device, the caller gets the EFI_FILE_PROTOCOL to the volume. This interface is used to open the root directory of the file system when needed. The caller must EFI_FILE_PROTOCOL.Close() the file handle to the root directory, and any other opened file handles before exiting. While there are open files on the device, usage of underlying device protocol(s) that the file system is abstracting must be avoided. For example, when a file system that is layered on a EFI_DISK_IO_PROTOCOL EFI_BLOCK_IO_PROTOCOL , direct block access to the device for the blocks that comprise the file system must be avoided while there are open file handles to the same device.
+
+A file system driver may cache data relating to an open file. A Flush() function is provided that flushes all dirty data in the file system, relative to the requested file, to the physical medium. If the underlying device may cache data, the file system must inform the device to flush as well.
+
+Implementations must account for cases where there is pending queued asynchronous I/O when a call is received on a blocking protocol interface. In these cases the pending I/O will be processed and completed before the blocking function is executed so that operation are carried out in the order they were requested.
+
+EFI_FILE_PROTOCOL.Open()
+Summary
+
+Opens a new file relative to the source file’s location.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_FILE_OPEN) (
+  IN EFI_FILE_PROTOCOL                  *This,
+  OUT EFI_FILE_PROTOCOL                 **NewHandle,
+  IN CHAR16                             *FileName,
+  IN UINT64                             OpenMode,
+  IN UINT64                             Attributes
+  );
+Parameters
+
+This
+A pointer to the EFI_FILE_PROTOCOL instance that is the file handle to the source location. This would typically be an open handle to a directory. See the type EFI_FILE_PROTOCOL description.
+
+NewHandle
+A pointer to the location to return the opened handle for the new file. See the type EFI_FILE_PROTOCOL description.
+
+FileName
+The Null-terminated string of the name of the file to be opened. The file name may contain the following path modifiers: “", “.”, and “..”.
+
+OpenMode
+The mode to open the file. The only valid combinations that the file may be opened with are: Read, Read/Write, or Create/Read/Write. See “Related Definitions” below.
+
+Attributes
+Only valid for EFI_FILE_MODE_CREATE, in which case these are the attribute bits for the newly created file. See “Related Definitions” below.
+
+Related Definitions
+
+//******************************************************
+// Open Modes
+//******************************************************
+#define EFI_FILE_MODE_READ       0x0000000000000001
+#define EFI_FILE_MODE_WRITE      0x0000000000000002
+#define EFI_FILE_MODE_CREATE     0x8000000000000000
+
+//******************************************************
+// File Attributes
+//******************************************************
+#define EFI_FILE_READ_ONLY       0x0000000000000001
+#define EFI_FILE_HIDDEN          0x0000000000000002
+#define EFI_FILE_SYSTEM          0x0000000000000004
+#define EFI_FILE_RESERVED        0x0000000000000008
+#define EFI_FILE_DIRECTORY       0x0000000000000010
+#define EFI_FILE_ARCHIVE         0x0000000000000020
+#define EFI_FILE_VALID_ATTR      0x0000000000000037
+Description
+
+The Open()function opens the file or directory referred to by FileName relative to the location of This and returns a NewHandle. The FileName may include the following path modifiers:
+
+“\”
+
+If the filename starts with a “\” the relative location is the root directory that This resides on; otherwise “" separates name components. Each name component is opened in turn, and the handle to the last file opened is returned.
+
+“.”
+
+Opens the current location.
+
+“..”
+
+Opens the parent directory for the current location. If the location is the root directory the request will return an error, as there is no parent directory for the root directory.
+
+If EFI_FILE_MODE_CREATE is set, then the file is created in the directory. If the final location of FileName does not refer to a directory, then the operation fails. If the file does not exist in the directory, then a new file is created. If the file already exists in the directory, then the existing file is opened.
+
+If the medium of the device changes, all accesses (including the File handle) will result in EFI_MEDIA_CHANGED. To access the new medium, the volume must be reopened.
+
+Status Codes Returned
+
+EFI_SUCCESS        The file was opened.
+EFI_NOT_FOUND      The specified file could not be found on the device.
+EFI_NO_MEDIA       The device has no medium.
+EFI_MEDIA_CHANGED  The device has a different medium in it or the medium is no longer supported.
+
+EFI_DEVICE_ERROR     The device reported an error.
+EFI_VOLUME_CORRUPTED The file system structures are corrupted.
+EFI_WRITE_PROTECTED   An attempt was made to create a file, or open a file for write when the media is write-protected.
+
+EFI_ACCESS_DENIED      The service denied access to the file.
+EFI_OUT_OF_RESOURCES    Not enough resources were available to open the file.
+EFI_VOLUME_FULLThe volume is full.
+
+FI_FILE_PROTOCOL.Close()
+Summary
+
+Closes a specified file handle.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_FILE_CLOSE) (
+  IN EFI_FILE_PROTOCOL                     *This
+  );
+Parameters
+
+This
+A pointer to the EFI_FILE_PROTOCOL instance that is the file handle to close. See the type EFI_FILE_PROTOCOL description.
+
+Description
+
+The Close() function closes a specified file handle. All “dirty” cached file data is flushed to the device, and the file is closed. In all cases the handle is closed. The operation will wait for all pending asynchronous I/O requests to complete before completing.
+
+Status Codes Returned
+
+EFI_SUCCESS  The file was closed.
+
+EFI_FILE_PROTOCOL.Delete()
+Summary
+
+Closes and deletes a file.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_FILE_DELETE) (
+  IN EFI_FILE_PROTOCOL                     *This
+  );
+Parameters
+
+This
+A pointer to the EFI_FILE_PROTOCOL instance that is the handle to the file to delete. See the type EFI_FILE_PROTOCOL description.
+
+Description
+
+The Delete() function closes and deletes a file. In all cases the file handle is closed. If the file cannot be deleted, the warning code EFI_WARN_DELETE_FAILURE is returned, but the handle is still closed.
+
+Status Codes Returned
+
+EFI_SUCCESS
+
+The file was closed and deleted, and the handle was closed.
+
+EFI_WARN_DELETE_FAILURE
+
+The handle was closed, but the file was not deleted.
+
+EFI_FILE_PROTOCOL.Read()
+Summary
+
+Reads data from a file.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_FILE_READ) (
+  IN EFI_FILE_PROTOCOL           *This,
+  IN OUT UINTN                   *BufferSize,
+  OUT VOID                       *Buffer
+  );
+Parameters
+
+This
+A pointer to the EFI_FILE_PROTOCOL instance that is the file handle to read data from. See the type EFI_FILE_PROTOCOL description.
+
+BufferSize
+On input, the size of the Buffer. On output, the amount of data returned in Buffer. In both cases, the size ismeasured in bytes.
+
+Buffer
+The buffer into which the data is read.
+
+Description
+
+The Read() function reads data from a file.
+
+If This is not a directory, the function reads the requested number of bytes from the file at the file’s current position and returns them in Buffer. If the read goes beyond the end of the file, the read length is truncated to the end of the file. The file’s current position is increased by the number of bytes returned.
+
+If This is a directory, the function reads the directory entry at the file’s current position and returns the entry in Buffer. If the Buffer is not large enough to hold the current directory entry, then EFI_BUFFER_TOO_SMALL is returned and the current file position is not updated. BufferSize is set to be the size of the buffer needed to read the entry. On success, the current position is updated to the next directory entry. If there are no more directory entries, the read returns a zero-length buffer. EFI_FILE_INFO is the structure returned as the directory entry.
+
+Status Codes Returned
+
+EFI_SUCCESS The data was read.
+EFI_NO_MEDIA The device has no medium.
+EFI_DEVICE_ERROR The device reported an error.
+EFI_DEVICE_ERROR An attempt was made to read from a deleted file.
+EFI_DEVICE_ERROR On entry, the current file position is beyond the end of the file.
+
+EFI_VOLUME_CORRUPTED The file system structures are corrupted.
+
+EFI_BUFFER_TOO_SMALL The BufferSize is too small to read the current directory entry. BufferSize has been updated with the size needed to complete the request.
+
+
+EFI_FILE_PROTOCOL.Write()
+Summary
+
+Writes data to a file.
+
+Prototype
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_FILE_WRITE) (
+  IN EFI_FILE_PROTOCOL              *This,
+  IN OUT UINTN                      *BufferSize,
+  IN VOID                           *Buffer
+  );
+Parameters
+
+This
+A pointer to the EFI_FILE_PROTOCOL instance that is the file handle to write data to. See the type EFI_FILE_PROTOCOL description.
+
+BufferSize
+On input, the size of the Buffer. On output, the amount of data actually written. In both cases, the size is measured in bytes.
+
+Buffer
+The buffer of data to write.
+
+Description
+
+The Write() function writes the specified number of bytes to the file at the current file position. The current file position is advanced the actual number of bytes written, which is returned in BufferSize. Partial writes only occur when there has been a data error during the write attempt (such as “file space full”). The file is automatically grown to hold the data if required.
+
+Direct writes to opened directories are not supported.
+
+Status Codes Returned
+
+EFI_SUCCESS The data was written.
+EFI_UNSUPPORT Writes to open directory files are not supported.
+EFI_NO_MEDIA The device has no medium.
+EFI_DEVICE_ERROR The device reported an error.
+EFI_DEVICE_ERROR An attempt was made to write to a deleted file.
+EFI_VOLUME_CORRUPTED The file system structures are corrupted.
+EFI_WRITE_PROTECTED The file or medium is write-protected.
+EFI_ACCESS_DENIED The file was opened read only.
+EFI_VOLUME_FULL The volume is full.

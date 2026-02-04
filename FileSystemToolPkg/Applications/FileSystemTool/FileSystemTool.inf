@@ -1,0 +1,34 @@
+[Defines]
+  INF_VERSION                    = 0x0001001A
+  BASE_NAME                      = FileSystemTool
+  FILE_GUID                      = 6802069e-5463-46b2-83a6-6050e78347ae
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  FileSystemTool.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  UefiBootServicesTableLib
+  BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
+ 
+
+[Protocols]
+  gEfiLoadedImageProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiDevicePathProtocolGuid   
+
+[Guids]
+  gEfiFileInfoGuid
+  gEfiFileSystemInfoGuid
+
+
