@@ -47,7 +47,6 @@ EFI_STATUS
 * `EFI_DEVICE_ERROR`：媒體/驅動錯誤
 * `EFI_ACCESS_DENIED`：存取權限問題
 
----
 
 ### 2.2 `EFI_FILE_PROTOCOL`
 
@@ -60,8 +59,6 @@ EFI_STATUS
 * `Delete()`
 * `GetInfo()`
 * `Close()`
-
----
 
 ### 2.3 `EFI_FILE_INFO` + `gEfiFileInfoGuid`
 
