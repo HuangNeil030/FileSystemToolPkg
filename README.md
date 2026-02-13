@@ -364,13 +364,6 @@ Size = Info->FileSize;
 
 ---
 
-## 9. 建議延伸（下一步你可以升級的點）
-
-* 支援選擇 FS0/FS1（列出每個 volume label）
-* Read 檔案內容分頁顯示/滾動
-* 支援 UTF-16 檔案內容（Create/Read 都用 Unicode）
-* Copy/Merge 支援超大檔（不限制 1MB）
----
 cd /d D:\BIOS\MyWorkSpace\edk2
 
 edksetup.bat Rebuild
