@@ -1,5 +1,4 @@
 # FileSystemToolPkg
-下面是你要的 **「函數使用方法筆記（README 版）」**：我把這個 FileSystemTool 專案會用到的 **UEFI 核心 API / Protocol / 函數**，用「教科書式」整理成可直接貼到 `README.md` 的筆記。
 
 ---
 
