@@ -359,6 +359,47 @@ Size = Info->FileSize;
 
   * 媒體或 driver 出錯（USB/虛擬磁碟）
 
+
+## 9.系統架構與主選單流程
+
+```
+FileSystemTool (UEFI Application)
+│
+├── Entry / Orchestrator
+│   ├── UefiMain()
+│   ├── OpenRootRobust()                 // Root 取得主入口（LoadedImage + Fallback）
+│   └── MainLoop()                       // 主選單迴圈（DrawMenu + Key dispatch）
+│
+├── Root / FS Discovery Layer
+│   ├── OpenRootFromLoadedImage()        // 從 ImageHandle -> LoadedImage -> DeviceHandle -> SimpleFS
+│   ├── OpenRootFallbackAnyFs()          // LocateHandleBuffer(ByProtocol SimpleFS) 找第一個 FS
+│   └── OpenRootRobust()                 // 封裝：先 current，再 fallback
+│
+├── Console / UI Layer
+│   ├── Clear()                          // ClearScreen + SetCursorPosition
+│   ├── DrawMenu()                       // 標題列 + 反白選單 + 快捷鍵提示
+│   ├── WaitKey()                        // gBS->WaitForEvent(ConIn->WaitForKey)
+│   ├── ReadKey()                        // ConIn->ReadKeyStroke
+│   ├── SetAttrTitle/Select/Normal()     // 顏色控制（綠底標題、藍底反白）
+│   └── Pause()                          // 等任意鍵繼續
+│
+├── Input Layer
+│   └── GetLine()                        // 讀一行輸入（Enter 完成 / Backspace 刪字 / Esc 取消）
+│
+├── File Helpers
+│   ├── OpenFileRead()                   // Root->Open(READ)
+│   ├── OpenFileCreateWrite()            // Root->Open(READ|WRITE|CREATE)
+│   └── GetFileSize()                    // File->GetInfo(gEfiFileInfoGuid) 兩段式取得 FileSize
+│
+└── Feature Handlers (Menu Actions)
+    ├── DoCreateFile()                   // Create + Write user data
+    ├── DoDeleteFile()                   // Delete（注意 Delete 會自動 Close）
+    ├── DoReadFile()                     // GetInfo + Read + Print
+    ├── DoCopyFile()                     // chunk read/write loop
+    └── DoMergeFile()                    // copy A + newline + copy B to new file
+
+```
+
 ---
 
 cd /d D:\BIOS\MyWorkSpace\edk2
